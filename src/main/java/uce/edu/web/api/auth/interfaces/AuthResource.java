@@ -4,14 +4,25 @@ import java.time.Instant;
 import java.util.Set;
 
 import io.smallrye.jwt.build.Jwt;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import uce.edu.web.api.auth.application.AuthService;
 
+@Path("/usuarios")
 public class AuthResource {
+
+    @Inject
+    private AuthService authService;
 
     @GET
     @Path("/token")
+    @Produces(MediaType.APPLICATION_JSON)
     public TokenResponse token(
             @QueryParam("user") String user,
             @QueryParam("password") String password
@@ -19,10 +30,9 @@ public class AuthResource {
 
         // Donde se compara el password y el usuario contra la base
         // Tarea, crear una tabla usuario con clave primaria, nombre, password y rol
-        boolean ok = true;
-        String role = "admin";
+        String role = authService.autenticar(user, password);
 
-        if (ok) {
+        if (role != null) {
             String issuer = "matricula-auth";
             long ttl = 3600;
             Instant now = Instant.now();
@@ -31,14 +41,13 @@ public class AuthResource {
             String jwt = Jwt.issuer(issuer)
                     .subject(user)
                     .groups(Set.of(role)) // roles: user / admin
-
                     .issuedAt(now)
                     .expiresAt(exp)
                     .sign();
 
             return new TokenResponse(jwt, exp.getEpochSecond(), role);
         } else {
-            return null;
+            throw new WebApplicationException("Credenciales Incorrectas", Response.Status.UNAUTHORIZED);
         }
 
     }
