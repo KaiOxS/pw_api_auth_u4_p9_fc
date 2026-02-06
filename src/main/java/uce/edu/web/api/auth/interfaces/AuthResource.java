@@ -9,9 +9,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import uce.edu.web.api.auth.application.AuthService;
 
 @Path("/usuarios")
@@ -47,7 +45,8 @@ public class AuthResource {
 
             return new TokenResponse(jwt, exp.getEpochSecond(), role);
         } else {
-            throw new WebApplicationException("Credenciales Incorrectas", Response.Status.UNAUTHORIZED);
+
+            return null;
         }
 
     }
