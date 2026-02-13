@@ -66,3 +66,203 @@ If you want to learn more about building native executables, please consult <htt
 Easily start your RESTful Web Services
 
 [Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--
+***Conexion entre tablas:
+ 
+Entidad 
+@OneToMany(mappedBy = "estudiante", cascade=CascadeType.ALL, fetch = FetchType.LAZY)
+    public List<Hijo> hijos;
+ 
+Representation, agrega la variable para guardar los links.
+private List<LinkDto> links;
+ 
+ 
+Metodo en el resourse:
+private EstudianteRepresentation construirLinks(EstudianteRepresentation er){
+        String self = this.uriInfo.getBaseUriBuilder().path(EstudianteResource.class).path(String.valueOf(er.getId())).build().toString();
+        String hijos = this.uriInfo.getBaseUriBuilder().path(EstudianteResource.class).path(String.valueOf(er.getId())).path("hijos").build().toString();
+        er.setLinks(List.of(new LinkDto(self,"self"), new LinkDto(hijos,"hijos"))); 
+        return er;
+}
+ 
+	Uso del metodo. 
+	public EstudianteRepresentation consultarPorId(@PathParam("id") Integer iden) {
+        	return this.construirLinks(this.estudianteService.consultarPorId(iden));
+ 
+	}
+ 
+***Como se linkea en resourse
+@PUT
+@Path("/{id}")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed("admin")
+public Response actualizar(@PathParam("id") Integer id, EstudianteRepresentation esstu){
+     this.estudianteService.actualizar(id, esstu);
+     return Response.status(209).entity(null).build();
+}
+ 
+ 
+***Obtener tocken
+import axios from "axios";
+const URL = "http://localhost:8082/matricula/api/v1.0/autorizacion/token?user=John&password=1234";
+const obtenerToken = async () => {
+    const token = await axios.get(`${URL}`).then(r => r.data);
+    console.log(token);
+    return token.token;
+}
+export const obtenerTokenFachada = async () => {
+    return await obtenerToken();
+}
+ 
+ 
+++Como usar dicho token
+import axios from "axios";
+import { obTokenFacade } from "../clients/ObtenerTockenClient.js";
+ 
+const URL = 'http://localhost:8080/citamedica/api/v1.0/pacientes';
+ 
+const consultarTodos = async () => {
+    const TOKEN = await obTokenFacade(); //
+    const res = await axios.get(`${URL}`, { headers: { Authorization: `Bearer ${TOKEN}` } }).then(r=>r.data);
+    return res;
+}
+ 
+***Configuración de un guardia:
+
+{
+		path: '/consultarTodos',
+		name: 'consultarTodos',
+		component: ConsultarTodosView,
+		meta: {
+			requiereAutorizacion: false,
+			esPublica: false
+		}
+	},
+
+/*Configuracion del guardian de rutas*/
+router.beforeEach((to, from, next) => {
+	if (to.meta.requiereAutorizacion) {
+		const estaAutenticado = localStorage.getItem("estaAutenticado");
+		const token = localStorage.getItem("token");
+
+		if (! estaAutenticado) {
+			console.log("Redirigiendo al Login");
+			next({name: 'login'})
+		} else {
+			next();
+		}
+
+		/*Le envio a una página de login*/
+	} else {
+		console.log("Pase Libre")
+		next();
+		/*Le dejo que pase sin autenticación*/
+	}
+})
+package uce.edu.web.api.matricula.application.representation;
+
+public class LinkDto {
+
+    private String href;
+    private String rel;
+
+    public String getHref() {
+        return href;
+    }
+
+    public void setHref(String href) {
+        this.href = href;
+    }
+
+    public String getRel() {
+        return rel;
+    }
+
+    public void setRel(String rel) {
+        this.rel = rel;
+    }
+
+    public LinkDto() {
+
+    }
+
+    public LinkDto(String href, String rel) {
+        this.href = href;
+        this.rel = rel;
+    }
+
+}
+ 
+
+
+
+-->

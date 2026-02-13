@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Set;
 
 import io.smallrye.jwt.build.Jwt;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -21,6 +22,7 @@ public class AuthResource {
     @GET
     @Path("/token")
     @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("admin")
     public TokenResponse token(
             @QueryParam("user") String user,
             @QueryParam("password") String password
